@@ -1,5 +1,11 @@
-const CACHE = 'myweek-v1';
-const ASSETS = ['/', '/index.html', '/manifest.json'];
+const CACHE = 'myweek-v2';
+const ASSETS = [
+  '/Calender-APP/',
+  '/Calender-APP/index.html',
+  '/Calender-APP/manifest.json',
+  '/Calender-APP/icon-192.png',
+  '/Calender-APP/icon-512.png'
+];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
@@ -14,7 +20,6 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  // Network first for Supabase API calls, cache first for assets
   if (e.request.url.includes('supabase.co')) {
     e.respondWith(
       fetch(e.request).catch(() => new Response(JSON.stringify({ error: 'offline' }), {
@@ -32,19 +37,16 @@ self.addEventListener('fetch', e => {
   );
 });
 
-// Push notifications
 self.addEventListener('push', e => {
   const data = e.data?.json() || {};
   e.waitUntil(self.registration.showNotification(data.title || '⏰ My Week', {
-    body: data.body || "You have a task now!",
-    icon: '/icon-192.png',
-    badge: '/icon-192.png',
-    vibrate: [200, 100, 200],
-    data: data
+    body: data.body || 'You have a task now!',
+    icon: '/Calender-APP/icon-192.png',
+    vibrate: [200, 100, 200]
   }));
 });
 
 self.addEventListener('notificationclick', e => {
   e.notification.close();
-  e.waitUntil(clients.openWindow('/'));
+  e.waitUntil(clients.openWindow('/Calender-APP/'));
 });
