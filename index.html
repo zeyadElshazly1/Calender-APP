@@ -462,8 +462,8 @@ body{color:var(--text);font-size:15px;overscroll-behavior:none}
 /* ══════════════════════════════════════════
    CONFIGURATION — fill these in before deploy
    ══════════════════════════════════════════ */
-const SUPA_URL = 'YOUR_SUPABASE_URL';      // e.g. https://xxxx.supabase.co
-const SUPA_KEY = 'YOUR_SUPABASE_ANON_KEY'; // your anon/public key
+const SUPA_URL = 'https://wtvqjkrurqitglquwzno.supabase.co';      // e.g. https://xxxx.supabase.co
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind0dnFqa3J1cnFpdGdscXV3em5vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1MjQzNTcsImV4cCI6MjA5NzEwMDM1N30.YpLUNdRaRZJhk-bALT99e7cnqPeVv8wyLT_GfRNNwZY'; // your anon/public key
 
 /* ══ CONSTANTS ══ */
 const DAYS  = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
@@ -583,7 +583,7 @@ async function loadAll() {
     status:r.status||'todo', doneDays:r.done_days||[]
   }));
   goals = (gr.data||[]).map(r=>({
-    id:r.id, title:r.title, desc:r.desc||'', steps:r.steps||1,
+    id:r.id, title:r.title, description:r.description||'', steps:r.steps||1,
     progress:r.progress||0, done:r.done||false, color:r.color||'#7C3AED'
   }));
   slots = {};
@@ -771,7 +771,7 @@ async function addGoal(){
     steps:parseInt(document.getElementById('gf-steps').value)||1,
     progress:0,done:false,color:document.getElementById('gf-color').value};
   goals.push(g);
-  await dbSave('goals',{id:g.id,user_id:currentUser.id,title:g.title,desc:g.desc,steps:g.steps,progress:0,done:false,color:g.color},'id');
+  await dbSave('goals',{id:g.id,user_id:currentUser.id,title:g.title,description:g.desc,steps:g.steps,progress:0,done:false,color:g.color},'id');
   document.getElementById('gf-title').value='';document.getElementById('gf-desc').value='';document.getElementById('gf-steps').value='';
   document.getElementById('gf').style.display='none';
   renderGoals();renderOverview();showToast('Goal added 🎯');
@@ -781,14 +781,14 @@ async function stepGoal(id,d){
   g.progress=Math.max(0,Math.min(g.steps,g.progress+d));
   g.done=g.progress>=g.steps;
   if(g.done)confetti();
-  await dbSave('goals',{id:g.id,user_id:currentUser.id,title:g.title,desc:g.desc,steps:g.steps,progress:g.progress,done:g.done,color:g.color},'id');
+  await dbSave('goals',{id:g.id,user_id:currentUser.id,title:g.title,description:g.desc,steps:g.steps,progress:g.progress,done:g.done,color:g.color},'id');
   renderGoals();renderOverview();
 }
 async function doneGoal(id){
   const g=goals.find(g=>g.id===id);if(!g)return;
   g.done=!g.done;g.progress=g.done?g.steps:Math.max(0,g.steps-1);
   if(g.done)confetti();
-  await dbSave('goals',{id:g.id,user_id:currentUser.id,title:g.title,desc:g.desc,steps:g.steps,progress:g.progress,done:g.done,color:g.color},'id');
+  await dbSave('goals',{id:g.id,user_id:currentUser.id,title:g.title,description:g.desc,steps:g.steps,progress:g.progress,done:g.done,color:g.color},'id');
   renderGoals();renderOverview();
 }
 async function delGoal(id){
