@@ -593,7 +593,8 @@ function showSync(state){
 async function dbSave(table,data,conflict){
   if(isOffline){offlineQ.push({table,data,conflict});localStorage.setItem('offline_q',JSON.stringify(offlineQ));showSync('pending');return;}
   showSync('pending');
-  await sb.from(table).upsert(data,{onConflict:conflict});
+  const {error} = await sb.from(table).upsert(data,{onConflict:conflict,ignoreDuplicates:false});
+  if(error) console.error('dbSave error',table,error.message,error);
   showSync('ok');
 }
 async function dbDel(table,match){
@@ -790,14 +791,18 @@ async function bookSlot(){
   if(!tid||!day||!time)return;
   const dates=weekDates(weekOff),di=DAYS.indexOf(day),key=day+'_'+time+'_'+dk(dates[di]);
   slots[key]=tid;
-  await dbSave('slots',{slot_key:key,user_id:currentUser.id,task_id:tid,slot_day:day,slot_time:time,slot_date:dk(dates[di])},'slot_key,user_id');
+  await dbDel('slots',{slot_key:key,user_id:currentUser.id});
+  await sb.from('slots').insert({slot_key:key,user_id:currentUser.id,task_id:tid,slot_day:day,slot_time:time,slot_date:dk(dates[di])});
+  showSync('ok');
   renderCalendar();showToast('Slot booked ✓');
 }
 async function removeSlot(key){delete slots[key];fired.delete(key);await dbDel('slots',{slot_key:key,user_id:currentUser.id});renderCalendar();showToast('Removed');}
 async function quickBook(day,h,dateStr){
   const tid=document.getElementById('bc-task').value;if(!tid){showToast('Select a task first');return;}
   const key=day+'_'+h+'_'+dateStr;slots[key]=tid;
-  await dbSave('slots',{slot_key:key,user_id:currentUser.id,task_id:tid,slot_day:day,slot_time:h,slot_date:dateStr},'slot_key,user_id');
+  await dbDel('slots',{slot_key:key,user_id:currentUser.id});
+  await sb.from('slots').insert({slot_key:key,user_id:currentUser.id,task_id:tid,slot_day:day,slot_time:h,slot_date:dateStr});
+  showSync('ok');
   renderCalendar();showToast('Booked ✓');
 }
 function renderCalendar(){
